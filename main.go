@@ -1,7 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"email-template-generator/database"
+	log "email-template-generator/log"
+	"email-template-generator/routes"
+	"fmt"
+	"os"
+)
 
 func main() {
-	fmt.Println("Hello , 世界")
+	_ = database.New()
+	server := routes.New()
+
+	log.Info("Hello , 世界")
+
+	port := os.Getenv("RUNNING_PORT")
+	if port == "" {
+		port = "9090"
+	}
+
+	fmt.Println(port)
+
+	server.Run(port)
 }
