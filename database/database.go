@@ -1,17 +1,23 @@
 package database
 
 import (
+	"email-template-generator/entity"
 	"email-template-generator/log"
 	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type Connection struct {
 	DB *gorm.DB
+}
+
+type Model struct {
+	Model interface{}
 }
 
 var (
@@ -45,8 +51,30 @@ func New() *Connection {
 		panic("Failed Connect Database")
 	}
 
+	migrate(db)
+
 	log.Info("Success Connect Database")
+
 	return &Connection{
 		DB: db,
 	}
+}
+
+func modelList() []Model {
+	return []Model{
+		{Model: entity.User{}},
+		{Model: entity.Email{}},
+	}
+}
+
+func migrate(db *gorm.DB) {
+	for _, item := range modelList() {
+		err := db.Debug().AutoMigrate(item.Model)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("Error Migrate - %s", err.Error()))
+			return
+		}
+	}
+
+	log.Info("Migrate Successfully")
 }

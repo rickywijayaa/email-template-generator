@@ -3,6 +3,7 @@ package main
 import (
 	"email-template-generator/database"
 	"email-template-generator/routes"
+	"fmt"
 	"os"
 )
 
@@ -15,5 +16,5 @@ func main() {
 		port = "9090"
 	}
 
-	server.Run(port)
+	server.Run(fmt.Sprintf("localhost:%v", port))
 }
