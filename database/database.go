@@ -8,6 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -52,6 +53,7 @@ func New() *Connection {
 	}
 
 	migrate(db)
+	seed(db)
 
 	log.Info("Success Connect Database")
 
@@ -77,4 +79,21 @@ func migrate(db *gorm.DB) {
 	}
 
 	log.Info("Migrate Successfully")
+}
+
+func seed(db *gorm.DB) {
+	var user entity.User
+	_ = db.Where("email = ?", "admin@gmail.com").Find(&user).Error
+
+	if user.ID == 0 {
+		password, _ := bcrypt.GenerateFromPassword([]byte("12345Qwe!"), bcrypt.MinCost)
+		db.Create(&entity.User{
+			Name:     "Admin",
+			Email:    "admin@gmail.com",
+			Password: string(password),
+			Token:    "",
+		})
+	}
+
+	log.Info("Success seeding")
 }
