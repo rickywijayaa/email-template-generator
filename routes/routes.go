@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"email-template-generator/app/user"
 	"email-template-generator/database"
 	"email-template-generator/handler"
 
@@ -11,7 +12,17 @@ func New(db *database.Connection) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 
-	router.GET("/", handler.Get)
+	//Init Repo
+	userRepository := user.NewRepository(db.DB)
+
+	//Init Service
+	userService := user.NewService(userRepository)
+
+	//Init Handler
+	userHandler := handler.NewUserHandler(userService)
+
+	api := router.Group("/api/v1")
+	api.POST("/login", userHandler.LoginUser)
 
 	return router
 }
