@@ -2,8 +2,10 @@ package routes
 
 import (
 	"email-template-generator/app/user"
+	"email-template-generator/auth"
 	"email-template-generator/database"
 	"email-template-generator/handler"
+	"email-template-generator/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,12 +19,14 @@ func New(db *database.Connection) *gin.Engine {
 
 	//Init Service
 	userService := user.NewService(userRepository)
+	authService := auth.NewJwtService()
 
 	//Init Handler
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	api := router.Group("/api/v1")
 	api.POST("/login", userHandler.LoginUser)
+	api.GET("/middleware", middleware.AuthMiddleware(userService, authService), userHandler.TestingMiddleware)
 
 	return router
 }

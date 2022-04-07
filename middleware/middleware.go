@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(userService user.Service, jwtService auth.Service) gin.HandlerFunc {
+func AuthMiddleware(userService user.Service, authService auth.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 
@@ -30,7 +30,7 @@ func AuthMiddleware(userService user.Service, jwtService auth.Service) gin.Handl
 			tokenString = headerToken[1]
 		}
 
-		token, err := jwtService.ValidateToken(tokenString)
+		token, err := authService.ValidateToken(tokenString)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, helper.APIFailedResponse(
 				"Unauthorized",

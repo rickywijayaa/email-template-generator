@@ -2,6 +2,7 @@ package handler
 
 import (
 	"email-template-generator/app/user"
+	"email-template-generator/auth"
 	"email-template-generator/helper"
 	"net/http"
 
@@ -9,11 +10,15 @@ import (
 )
 
 type userHandler struct {
-	service user.Service
+	service     user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(service user.Service) *userHandler {
-	return &userHandler{service: service}
+func NewUserHandler(service user.Service, authService auth.Service) *userHandler {
+	return &userHandler{
+		service:     service,
+		authService: authService,
+	}
 }
 
 func (h *userHandler) LoginUser(c *gin.Context) {
@@ -42,20 +47,27 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	//JWT
-	// token, err := h.AuthService.GenerateToken(loggedInUser.ID)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, helper.APIFailedResponse(
-	// 		"Failed To Login",
-	// 		http.StatusBadRequest,
-	// 		gin.H{"errors": err.Error()},
-	// 	))
-	// 	return
-	// }
+	_, err = h.authService.GenerateToken(response.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIFailedResponse(
+			"Failed To Login",
+			http.StatusBadRequest,
+			gin.H{"errors": err.Error()},
+		))
+		return
+	}
 
 	c.JSON(http.StatusOK, helper.APIResponse(
 		"Successfully Login",
 		http.StatusOK,
 		response,
+	))
+}
+
+func (h *userHandler) TestingMiddleware(c *gin.Context) {
+	c.JSON(http.StatusOK, helper.APIResponse(
+		"Successfully Login",
+		http.StatusOK,
+		"Middleware Passed",
 	))
 }
