@@ -8,6 +8,7 @@ import (
 
 type Service interface {
 	Login(input LoginInput) (UserFormatter, error)
+	GetUserByID(ID int) (UserFormatter, error)
 }
 
 type service struct {
@@ -34,6 +35,21 @@ func (s *service) Login(input LoginInput) (UserFormatter, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return UserFormatter{}, errors.New("Incorrect Password")
+	}
+
+	response := UserFormat(user, user.Token)
+
+	return response, nil
+}
+
+func (s *service) GetUserByID(ID int) (UserFormatter, error) {
+	user, err := s.repository.FindByID(ID)
+	if err != nil {
+		return UserFormatter{}, err
+	}
+
+	if user.ID == 0 {
+		return UserFormatter{}, errors.New("User not found")
 	}
 
 	response := UserFormat(user, user.Token)
