@@ -3,6 +3,7 @@ package handler
 import (
 	"email-template-generator/app/user"
 	"email-template-generator/auth"
+	"email-template-generator/entity"
 	"email-template-generator/helper"
 	"net/http"
 
@@ -47,7 +48,7 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	_, err = h.authService.GenerateToken(response.ID)
+	signedToken, err := h.authService.GenerateToken(response.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, helper.APIFailedResponse(
 			"Failed To Login",
@@ -57,6 +58,9 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
+	response.Token = signedToken
+	response, err = h.service.UpdateToken(response)
+
 	c.JSON(http.StatusOK, helper.APIResponse(
 		"Successfully Login",
 		http.StatusOK,
@@ -64,10 +68,36 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 	))
 }
 
-func (h *userHandler) TestingMiddleware(c *gin.Context) {
+func (h *userHandler) ChangePassword(c *gin.Context) {
+	var input user.ChangePasswordInput
+	currentUser := c.MustGet("current_user").(entity.User)
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := helper.ErrorMessageResponse(errors)
+
+		c.JSON(http.StatusBadRequest, helper.APIFailedResponse(
+			"Failed to Change Password",
+			http.StatusBadRequest,
+			errorMessage,
+		))
+		return
+	}
+
+	response, err := h.service.ChangePassword(currentUser, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIFailedResponse(
+			"Failed to Change Password",
+			http.StatusBadRequest,
+			gin.H{"errors": err.Error()},
+		))
+		return
+	}
+
 	c.JSON(http.StatusOK, helper.APIResponse(
-		"Successfully Login",
+		"Success Change Password",
 		http.StatusOK,
-		"Middleware Passed",
+		response,
 	))
 }

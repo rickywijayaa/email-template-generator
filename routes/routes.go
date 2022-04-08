@@ -26,7 +26,7 @@ func New(db *database.Connection) *gin.Engine {
 
 	api := router.Group("/api/v1")
 	api.POST("/login", userHandler.LoginUser)
-	api.GET("/middleware", middleware.AuthMiddleware(userService, authService), userHandler.TestingMiddleware)
+	api.POST("/change-password", middleware.AuthMiddleware(userService, authService), userHandler.ChangePassword)
 
 	return router
 }

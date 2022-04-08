@@ -3,6 +3,7 @@ package middleware
 import (
 	"email-template-generator/app/user"
 	"email-template-generator/auth"
+	"email-template-generator/entity"
 	"email-template-generator/helper"
 	"net/http"
 	"strings"
@@ -62,7 +63,14 @@ func AuthMiddleware(userService user.Service, authService auth.Service) gin.Hand
 			return
 		}
 
-		c.Set("current_user", user)
+		data := entity.User{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Token: user.Token,
+		}
+
+		c.Set("current_user", data)
 		c.Next()
 	}
 }
