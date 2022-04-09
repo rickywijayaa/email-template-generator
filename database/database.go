@@ -66,6 +66,7 @@ func modelList() []Model {
 	return []Model{
 		{Model: entity.User{}},
 		{Model: entity.Email{}},
+		{Model: entity.SystemConfig{}},
 	}
 }
 
@@ -92,6 +93,31 @@ func seed(db *gorm.DB) {
 			Email:    "admin@gmail.com",
 			Password: string(password),
 			Token:    "",
+		})
+	}
+
+	var systemConfig entity.SystemConfig
+	_ = db.Where("code = ? AND value = ?", "Language", "Indonesia").Find(&systemConfig)
+	if systemConfig.ID == 0 {
+		db.Create(&entity.SystemConfig{
+			Code:  "Language",
+			Value: "Indonesia",
+		})
+	}
+
+	_ = db.Where("code = ? AND value = ?", "Language", "English").Find(&systemConfig)
+	if systemConfig.ID == 0 {
+		db.Create(&entity.SystemConfig{
+			Code:  "Language",
+			Value: "English",
+		})
+	}
+
+	_ = db.Where("code = ? AND value = ?", "TemplateEmail", "Job Application").Find(&systemConfig)
+	if systemConfig.ID == 0 {
+		db.Create(&entity.SystemConfig{
+			Code:  "TemplateEmail",
+			Value: "Job Application",
 		})
 	}
 
