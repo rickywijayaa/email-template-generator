@@ -10,6 +10,6 @@ type GeneralIdInput struct {
 }
 
 type ChangePasswordInput struct {
-	OldPassword string `json:"old_password" binding:"required"`
+	OldPassword string `json:"oldPassword" binding:"required"`
 	Password    string `json:"password" binding:"required"`
 }
